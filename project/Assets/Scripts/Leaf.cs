@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Leaf  {
 
-    private float MIN_LEAF_SIZE = 1.0f;
+    static float MIN_LEAF_SIZE = 1.0f;
 
     public float x, y, width, height;
 
@@ -56,9 +57,9 @@ public class Leaf  {
                 leftChild.CreateRooms();
             if (rightChild != null)
                 rightChild.CreateRooms();
-
             if (leftChild != null && rightChild != null)
                 CreateHall(leftChild.GetRoom(), rightChild.GetRoom());
+
         }
         else
         {
@@ -73,7 +74,7 @@ public class Leaf  {
         }
     }
 
-    public Transform GetRoom() {
+    private Transform GetRoom() {
         if (room)
         {
             return room.transform;
@@ -100,65 +101,105 @@ public class Leaf  {
         }
     }
 
-
-    private void BuildHall(Vector2 point1, Vector2 point2, int shiftX, int shiftY) {
-
-            GameObject hall1 = Object.Instantiate(Resources.Load("Hall") as GameObject);
-            hall1.transform.position = new Vector2((point1.x + point2.x) / 2, point1.y + shiftY * (point2.y - point1.y));
-            hall1.transform.localScale = new Vector2(point2.x - point1.x + 0.3f, 0.3f);
-
-            GameObject hall2 = Object.Instantiate(Resources.Load("Hall") as GameObject);
-            hall2.transform.position = new Vector2(point2.x + shiftX * (point2.x - point1.x), (point1.y + point2.y) / 2);
-            hall2.transform.localScale = new Vector2(0.3f, point2.y - point1.y + 0.3f);
-
+    static bool CompInters(Vector2 interOne, Vector2 interTwo, char method) {
+        if (method == 'm' && interOne[0] >= interTwo[1])
+            return true;
+        else if (method == 'l' && interOne[1] <= interTwo[0])
+            return true;
+        else if (method == 'e' && ((interOne[0] < interTwo[0] && interOne[1] > interTwo[0]) || 
+                                   (interOne[0] < interTwo[1] && interOne[1] > interTwo[1]) || 
+                                   (interOne[0] > interTwo[0] && interOne[1] < interTwo[1])))
+            return true;
+        else
+            return false;
     }
 
-    public void CreateHall(Transform lRoom, Transform rRoom) {
-
-        Vector2 point1, point2;
-
+    static void BuildHall(params Vector2[] points) {
+        for (int i = 0; i < points.Length - 1; i++)
         {
-            Vector2 point = lRoom.position;
-            Vector2 delta = lRoom.localScale;
-            point1 = new Vector2(Random.Range(point.x - delta.x / 2 + 0.15f, point.x + delta.x / 2 - 0.15f), 
-                                 Random.Range(point.y - delta.y / 2 + 0.15f, point.y + delta.y / 2 - 0.15f));
-        }
+            GameObject hall = Object.Instantiate(Resources.Load("Hall") as GameObject);
+            Vector2 pointOne = points[i];
+            Vector2 pointTwo = points[i + 1];
+            Vector2 hallSize, hallPosition;
 
-        {
-            Vector2 point = rRoom.position;
-            Vector2 delta = rRoom.localScale;
-            point2 = new Vector2(Random.Range(point.x - delta.x / 2 + 0.15f, point.x + delta.x / 2 - 0.15f), 
-                                 Random.Range(point.y - delta.y / 2 + 0.15f, point.y + delta.y / 2 - 0.15f));
-        }
-
-        float width = point2.x - point1.x;
-        float height = point2.y - point1.y;
-        bool cor = Random.value > 0.5;
-
-        if (width < 0)
-        {
-            if (height < 0)
-                BuildHall(point2, point1, cor ? 0 : -1, cor ? 0 : 1);
-            else
+            if (pointOne.x == pointTwo.x)
             {
-                point1.y = point1.y + point2.y;
-                point2.y = point1.y - point2.y;
-                point1.y = point1.y - point2.y;
-                BuildHall(point2, point1, cor ? 0 : -1, cor ? 1 : 0);
-            }
-        }
-        else
-        {
-            if (height < 0)
-            {
-                point1.y = point1.y + point2.y;
-                point2.y = point1.y - point2.y;
-                point1.y = point1.y - point2.y;
-                BuildHall(point1, point2, cor ? -1 : 0, cor ? 0 : 1);
+                hallSize = new Vector2(0.3f, Mathf.Abs(pointOne.y - pointTwo.y) + 0.3f);
+                hallPosition = new Vector2(pointOne.x, Mathf.Min(pointOne.y, pointTwo.y) + hallSize.y / 2 - 0.15f);
             }
             else
-                BuildHall(point1, point2, cor ? 0 : -1, cor ? 0 : 1);
+            {
+                hallSize = new Vector2(Mathf.Abs(pointOne.x - pointTwo.x) + 0.3f, 0.3f);
+                hallPosition = new Vector2(Mathf.Min(pointOne.x, pointTwo.x) + hallSize.x / 2 - 0.15f, pointOne.y);
+            }
 
+            hall.transform.position = hallPosition;
+            hall.transform.localScale = hallSize;
+        }
+    }
+
+    static void CreateHall(Transform lRoom, Transform rRoom) {
+
+        Vector2 oneDeltaX = new Vector2(lRoom.position.x - lRoom.localScale.x / 2 + 0.15f, lRoom.position.x + lRoom.localScale.x / 2 - 0.15f);
+        Vector2 oneDeltaY = new Vector2(lRoom.position.y - lRoom.localScale.y / 2 + 0.15f, lRoom.position.y + lRoom.localScale.y / 2 - 0.15f);
+        Vector2 twoDeltaX = new Vector2(rRoom.position.x - rRoom.localScale.x / 2 + 0.15f, rRoom.position.x + rRoom.localScale.x / 2 - 0.15f);
+        Vector2 twoDeltaY = new Vector2(rRoom.position.y - rRoom.localScale.y / 2 + 0.15f, rRoom.position.y + rRoom.localScale.y / 2 - 0.15f);
+
+        Vector2 one = new Vector2(Random.Range(oneDeltaX[0], oneDeltaX[1]), Random.Range(oneDeltaY[0], oneDeltaY[1]));
+        Vector2 two = new Vector2(Random.Range(twoDeltaX[0], twoDeltaX[1]), Random.Range(twoDeltaY[0], twoDeltaY[1]));
+        bool side = Random.value < 0.5;
+
+        if (CompInters(oneDeltaX, twoDeltaX, 'm') && CompInters(oneDeltaY, twoDeltaY, 'l'))
+        {
+            BuildHall(side ? new Vector2(oneDeltaX[0], one.y) : new Vector2(one.x, oneDeltaY[1]),
+                      side ? new Vector2(two.x, one.y) : new Vector2(one.x, two.y),
+                      side ? new Vector2(two.x, twoDeltaY[0]) : new Vector2(twoDeltaX[1], two.y));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'e') && CompInters(oneDeltaY, twoDeltaY, 'l'))
+        {
+            float point = Random.Range(Mathf.Max(oneDeltaX[0], twoDeltaX[0]), Mathf.Min(oneDeltaX[1], twoDeltaX[1]));
+            BuildHall(new Vector2(point, oneDeltaY[1]), new Vector2(point, twoDeltaY[0]));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'l') && CompInters(oneDeltaY, twoDeltaY, 'l'))
+        {
+            BuildHall(side ? new Vector2(oneDeltaX[1], one.y) : new Vector2(one.x, oneDeltaY[1]),
+                      side ? new Vector2(two.x, one.y) : new Vector2(one.x, two.y),
+                      side ? new Vector2(two.x, twoDeltaY[0]) : new Vector2(twoDeltaX[0], two.y));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'l') && CompInters(oneDeltaY, twoDeltaY, 'e'))
+        {
+            float point = Random.Range(Mathf.Max(oneDeltaY[0], twoDeltaY[0]), Mathf.Min(oneDeltaY[1], twoDeltaY[1]));
+            BuildHall(new Vector2(oneDeltaX[1], point), new Vector2(twoDeltaX[0], point));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'l') && CompInters(oneDeltaY, twoDeltaY, 'm'))
+        {
+            BuildHall(side ? new Vector2(oneDeltaX[1], one.y) : new Vector2(one.x, oneDeltaY[0]),
+                      side ? new Vector2(two.x, one.y) : new Vector2(one.x, two.y),
+                      side ? new Vector2(two.x, twoDeltaY[1]) : new Vector2(twoDeltaX[0], two.y));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'e') && CompInters(oneDeltaY, twoDeltaY, 'm'))
+        {
+            float point = Random.Range(Mathf.Max(oneDeltaX[0], twoDeltaX[0]), Mathf.Min(oneDeltaX[1], twoDeltaX[1]));
+            BuildHall(new Vector2(point, oneDeltaY[0]), new Vector2(point, twoDeltaY[1]));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'm') && CompInters(oneDeltaY, twoDeltaY, 'm'))
+        {
+            BuildHall(side ? new Vector2(oneDeltaX[0], one.y) : new Vector2(one.x, oneDeltaY[0]),
+                      side ? new Vector2(two.x, one.y) : new Vector2(one.x, two.y),
+                      side ? new Vector2(two.x, twoDeltaY[1]) : new Vector2(twoDeltaX[1], two.y));
+            return;
+        }
+        if (CompInters(oneDeltaX, twoDeltaX, 'm') && CompInters(oneDeltaY, twoDeltaY, 'e'))
+        {
+            float point = Random.Range(Mathf.Max(oneDeltaY[0], twoDeltaY[0]), Mathf.Min(oneDeltaY[1], twoDeltaY[1]));
+            BuildHall(new Vector2(oneDeltaX[0], point), new Vector2(twoDeltaX[1], point));
+            return;
         }
     }
 }

@@ -6,9 +6,9 @@ public class World : MonoBehaviour {
     
     public int width, height, count;
 
-    private List<Leaf> _leafs = new List<Leaf>();
-
 	void Start () {
+
+        List<Leaf> _leafs = new List<Leaf>();
 
         Leaf root = new Leaf(-width / 2,  -height / 2, width, height);
         _leafs.Add(root);
@@ -34,7 +34,9 @@ public class World : MonoBehaviour {
         }
 
         root.CreateRooms();
-	
+
+        Vector2 pos = GameObject.FindGameObjectWithTag("Room").transform.position;
+        Instantiate(Resources.Load("Player") as GameObject, new Vector3(pos.x, pos.y, -1), Quaternion.identity);
 	}
 	
 }

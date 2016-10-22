@@ -50,6 +50,7 @@ public class Leaf  {
         return true;
     }
 
+
     public void CreateRooms() {
         if (leftChild != null || rightChild != null)
         {
@@ -71,6 +72,7 @@ public class Leaf  {
             room = Object.Instantiate(Resources.Load("Room") as GameObject);
             room.transform.position = roomPosition;
             room.transform.localScale = roomSize;
+            room.transform.parent = GameObject.FindGameObjectWithTag("Rooms").transform;
         }
     }
 
@@ -135,6 +137,7 @@ public class Leaf  {
 
             hall.transform.position = hallPosition;
             hall.transform.localScale = hallSize;
+            hall.transform.parent = GameObject.FindGameObjectWithTag("Halls").transform;
         }
     }
 

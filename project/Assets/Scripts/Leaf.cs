@@ -4,10 +4,11 @@ using System.Collections.Generic;
 
 public class Leaf  {
 
-    static float MIN_LEAF_SIZE = 1.0f;
+    static float MIN_LEAF_SIZE = 2.0f;
+    static float MIN_ROOM_LENGHT = 1.8f;
+    static float MAX_ROOM_LENGHT = 8f;
 
     public float x, y, width, height;
-
     public Leaf rightChild = null;
     public Leaf leftChild = null;
     public GameObject room;
@@ -64,8 +65,18 @@ public class Leaf  {
         }
         else
         {
-            Vector2 roomSize = new Vector2(Random.Range(0.8f, width - 0.2f), Random.Range(0.8f, height - 0.2f));
-            Vector2 roomPosition = new Vector2(Random.Range(0.1f, width - roomSize.x - 0.1f), Random.Range(0.1f, height - roomSize.y - 0.1f));
+            Vector2 roomSize = new Vector2
+                (
+                    Mathf.Clamp(Random.Range(0.8f, width - 0.2f), MIN_ROOM_LENGHT, MAX_ROOM_LENGHT),
+                    Mathf.Clamp(Random.Range(0.8f, height - 0.2f), MIN_ROOM_LENGHT, MAX_ROOM_LENGHT)
+                );
+
+            Vector2 roomPosition = new Vector2
+                (
+                    Random.Range(0.1f, width - roomSize.x - 0.1f), 
+                    Random.Range(0.1f, height - roomSize.y - 0.1f)
+                );
+
             roomPosition.x = roomPosition.x + roomSize.x / 2 + x;
             roomPosition.y = roomPosition.y + roomSize.y / 2 + y;
 

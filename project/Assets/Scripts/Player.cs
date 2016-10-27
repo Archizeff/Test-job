@@ -3,22 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Player : MonoBehaviour {
-    private float maxSpeed = 2f;
+    static float maxSpeed = 2f;
+    public Vector4 actualArea;
+    public bool god = true;
+
     private Rigidbody2D body;
     private List<Transform> _areas = new List<Transform>();
-    private Vector4 actualArea;
 
 	void Start () {
         body = GetComponent<Rigidbody2D>();
-        actualArea[0] = -20;
-        actualArea[1] = 20;
-        actualArea[2] = -20;
-        actualArea[3] = 20;
     }
 
     void FixedUpdate()
     {
         Vector2 movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+
+        if (god && movement.x != 0 && movement.y != 0) {
+            god = false;
+            gameObject.layer = 0;
+        }
+
         body.velocity = movement * maxSpeed;
 
         body.position = new Vector2
@@ -28,7 +32,22 @@ public class Player : MonoBehaviour {
             );
     }
 
-    private float[] toArray(int axe) {
+    void OnTriggerExit2D(Collider2D col) {
+        _areas.Remove(col.GetComponent<Transform>());
+        updateArea();
+    }
+
+    void OnTriggerEnter2D(Collider2D col) {
+        _areas.Add(col.GetComponent<Transform>());
+        updateArea();
+    }
+
+    void OnCollisionEnter2D() {
+        Debug.Log("Bah!");
+    }
+
+    private float[] toArray(int axe)
+    {
         float[] temp = new float[_areas.Count];
         for (int i = 0; i < temp.Length; i++)
         {
@@ -39,20 +58,8 @@ public class Player : MonoBehaviour {
         return temp;
     }
 
-    void OnTriggerExit2D(Collider2D col) {
-
-        _areas.Remove(col.GetComponent<Transform>());
-
-        actualArea[0] = Mathf.Min(toArray(0));
-        actualArea[1] = Mathf.Max(toArray(1));
-        actualArea[2] = Mathf.Min(toArray(2));
-        actualArea[3] = Mathf.Max(toArray(3));
-    }
-
-    void OnTriggerEnter2D(Collider2D col) {
-
-        _areas.Add(col.GetComponent<Transform>());
-
+    private void updateArea()
+    {
         actualArea[0] = Mathf.Min(toArray(0));
         actualArea[1] = Mathf.Max(toArray(1));
         actualArea[2] = Mathf.Min(toArray(2));

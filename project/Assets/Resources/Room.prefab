@@ -67,7 +67,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d295719ff03403e4aa6b1c38ebf2fb85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BadGuy: {fileID: 1000011040630322, guid: 82f711524c402b145967ca5893704076, type: 2}
+  badGuy: {fileID: 1000011040630322, guid: 82f711524c402b145967ca5893704076, type: 2}
+  world: {fileID: 1000011909945990, guid: ab78482c2af074e4c836400e4f89eccf, type: 2}
 --- !u!212 &212000013359464940
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -43,7 +43,7 @@ public class Player : MonoBehaviour {
     }
 
     void OnCollisionEnter2D() {
-        Debug.Log("Bah!");
+        Application.LoadLevel("Main");
     }
 
     private float[] toArray(int axe)

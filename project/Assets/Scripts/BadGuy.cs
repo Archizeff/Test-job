@@ -11,7 +11,6 @@ public class BadGuy : MonoBehaviour {
 
     void Start () {
         body = GetComponent<Rigidbody2D>();
-        //Debug.Log(actualArea[0] + " " + actualArea[1] + " " + actualArea[2] + " " + actualArea[3]);
     }
 
     void Update() {
@@ -19,7 +18,6 @@ public class BadGuy : MonoBehaviour {
         if (state)
         {
             target = new Vector2(Random.Range(actualArea[0], actualArea[1]), Random.Range(actualArea[2], actualArea[3]));
-           // Debug.Log(target[0] + " " + target[1]);
             body.velocity = (target - body.position) * speed;
             state = false;
         }
